@@ -40,6 +40,96 @@ function Get-TickTickPercent {
     }
 }
 
+<#
+.SYNOPSIS
+    Short description
+.DESCRIPTION
+    Long description
+.EXAMPLE
+    Example of how to use this cmdlet
+.EXAMPLE
+    Another example of how to use this cmdlet
+#>
+function Get-ProgressBarBox {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory=$true)][string]$Param1
+    )
+    
+    begin {
+    }
+    
+    process {
+        
+    }
+    
+    end {
+    }
+}
+
+<#
+.SYNOPSIS
+    Short description
+.DESCRIPTION
+    Long description
+#>
+function Export-AppRegistrationCertificateReport {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory=$true)]$apps_with_creds
+    )
+    
+    begin {
+    }
+    
+    process {
+        $html = New-Object System.Collections.Generic.List[System.String]
+        $html.Add('<html>')
+        $html.Add('<head>')
+        $html.Add('<title>App Registration Report</title>')
+        $html.Add('<style>')
+        #$html.Add('progress { background-color: #f3f3f3; border: 0; height: 18px; border-radius: 9px; }')
+        $html.Add('table { border: 1px solid black; }')
+        $html.Add('</style>')
+        $html.Add('<body>')
+
+        foreach ($app in $apps_with_creds) {
+            $html.Add("<h1>$($app.displayName)</h1>")
+            $html.Add("<strong>id: </strong>$($app.id)<br />")
+            $html.Add("<strong>App id: </strong>$($app.AppId)<br />")
+            if ($null -ne $app.decription -and $app.description -ne "") {
+                $html.Add("<strong>description: </strong>$($app.description)<br />")
+            }
+            $html.Add('<h2>Certificates</h2>')
+            if ($app.keyCredentials.count -eq 0) {
+                $html.Add('<p>No Certificates</p>')
+            } else {
+                foreach ($key in $app.keyCredentials) {
+                    $html.Add('<table>')
+                    $html.Add("<tr><th>Name</th><td>$($key.displayName)</td></tr>")
+                    $html.Add("<tr><th>KeyId</th><td>$($key.keyId)</td></tr>")
+                    if ($key.Expired) {
+                        $html.Add("<tr><th>Valid until</th><td><span style=`"color:red;`">$($key.endDateTime.toString('yyyy-MM-dd HH:mm:ss'))</span></td></tr>")
+                    } else {
+                        $html.Add("<tr><th>Valid until</th><td>$($key.endDateTime.toString('yyyy-MM-dd HH:mm:ss'))</td></tr>")
+                    }
+                    $Percentage = $key.Percentage
+                    $certlifetime = "<progress value='$Percentage' max='100'></progress>"
+                    $html.Add("<tr><th>Lifetime</th><td>$certlifetime</td></tr>")
+                    $html.Add('</table>')
+                }
+            }
+        }
+
+    }
+    
+    end {
+        $html
+    }
+}
+
 #
 # Script
 #
@@ -68,7 +158,10 @@ foreach ($app in $apps_with_creds) {
         
         # Foreach credential
         foreach ($cert in $app.keyCredentials) {
-            # ...
+            $cert['Expired'] = [bool]((Get-Date) -gt $cert.endDateTime)
+            
+            $percentage = Get-TickTickPercent -startDateTime $cert.startDateTime -endDateTime $cert.endDateTime
+            $cert['Percentage'] = $percentage
         }
 }
 
