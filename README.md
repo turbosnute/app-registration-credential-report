@@ -1,5 +1,5 @@
 # EntraID App Registration Credential Report
-This script is used to make a quick and dirty report of certificates and client secrets used for app registration authentication in Entra ID.
+This script is used to make a quick and dirty html report of certificates and client secrets used for app registration authentication in Entra ID.
 
 # Reqiured Powershell Module
 ```
