@@ -38,7 +38,7 @@ function Get-TickTickPercent {
         $percentage = [int]($now / $end * 100)
         
         if ($percentage -gt 100) {
-            $percentalge = 100
+            $percentage = 100
         }
 
         $percentage
